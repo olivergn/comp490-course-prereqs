@@ -1,0 +1,10 @@
+Paper,Primary prerequisite
+A,
+B,A
+C,
+D,B or C
+E,B and C
+F,B or (A and C)
+G,A and (B or C)
+H,D or E or F or G
+I,D and E and F and G
