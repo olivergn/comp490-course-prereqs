@@ -68,7 +68,6 @@ def add_row_trad(driver, row, collapse_option=False):
         prereq = tf.parse_tokens(tf.tokenize(str(row['Primary prerequisite'])))
         if collapse_option:
             prereq = tf.collapse_tokens(prereq)
-            print(row['Paper'] + ": " + str(prereq))
         add_prereqs_trad(driver, id, prereq)
 
 def add_row_num(driver, row, divide_on="or"):
