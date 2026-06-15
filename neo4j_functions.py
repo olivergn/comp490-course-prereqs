@@ -51,6 +51,33 @@ def add_prereqs_num(driver, dest_id, prereq, weight, divide_on="or"):
             for i in range(1, len(prereq)):
                 add_prereqs_num(driver, dest_id, prereq[i], weight)
 
+def add_prereqs_partial_num(driver, dest_id, prereq, weight):
+    if isinstance(prereq, str):
+        query = """
+        MERGE (p:Paper {name: $prereqName})
+        MATCH (n)
+        WHERE elementId(n) = $id
+        MERGE (p)-[:PREREQ {weight: $weight}]->(n)
+        """
+        _, _, _ = driver.execute_query(query, prereqName=prereq, id=dest_id, weight=weight)
+    else:
+        new_weight = weight / (len(prereq) - 1) if prereq[0] == "or" else weight
+        query = """
+        CREATE (c:Connector)
+        MATCH (n)
+        WHERE elementId(n) = $id
+        MERGE (c)-[:PREREQ {weight: $weight}]->(n)
+        RETURN c
+        """
+
+        for i in range(1, len(prereq)):
+            if isinstance(prereq[i], tuple):
+                records, _, _ = driver.execute_query(query, id=dest_id, weight=new_weight)
+                id = records[0]["c"].element_id
+                add_prereqs_partial_num(driver, id, prereq[i], weight=1.0)
+            else:
+                add_prereqs_partial_num(driver, dest_id, prereq[i], weight=new_weight)
+
 ##
 # Add row functions
 ##
@@ -83,6 +110,19 @@ def add_row_num(driver, row, divide_on="or"):
         prereq = tf.collapse_tokens(tf.parse_tokens(tf.tokenize(str(row['Primary prerequisite']))))
         add_prereqs_num(driver, id, prereq, weight=1.0, divide_on=divide_on)
 
+def add_row_partial_num(driver, row):
+    paper = str(row['Paper'])
+    query = """
+    MERGE (p:Paper {name: $paperName})
+    RETURN p
+    """
+    records, _, _ = driver.execute_query(query, paperName=paper)
+    id = records[0]["p"].element_id
+
+    if pd.notna(row['Primary prerequisite']):
+        prereq = tf.collapse_tokens(tf.parse_tokens(tf.tokenize(str(row['Primary prerequisite']))))
+        add_prereqs_partial_num(driver, id, prereq, weight=1.0)
+
 ##
 # Populate functions
 ##
@@ -98,3 +138,7 @@ def populate_db_n_tree(driver, prereqs):
 def populate_db_num(driver, prereqs, divide_on="or"):
     for index, row in prereqs.iterrows():
         add_row_num(driver, row, divide_on=divide_on)
+
+def populate_db_partial_num(driver, prereqs, divide_on="or"):
+    for index, row in prereqs.iterrows():
+        add_row_partial_num(driver, row)
