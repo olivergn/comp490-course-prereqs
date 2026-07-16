@@ -16,6 +16,7 @@ def add_prereqs_trad(driver, dest_id, prereq):
     if isinstance(prereq, str):
         query = """
         MERGE (p:Paper {name: $prereqName})
+        WITH p
         MATCH (n)
         WHERE elementId(n) = $id
         MERGE (p)-[:PREREQ]->(n)
@@ -24,6 +25,7 @@ def add_prereqs_trad(driver, dest_id, prereq):
     else:
         query = """
         CREATE (c:Connector {name: $connectorName})
+        WITH c
         MATCH (n)
         WHERE elementId(n) = $id
         MERGE (c)-[:PREREQ]->(n)
@@ -38,6 +40,7 @@ def add_prereqs_num(driver, dest_id, prereq, weight, divide_on="or"):
     if isinstance(prereq, str):
         query = """
         MERGE (p:Paper {name: $prereqName})
+        WITH p
         MATCH (n)
         WHERE elementId(n) = $id
         MERGE (p)-[:PREREQ {weight: $weight}]->(n)
@@ -55,6 +58,7 @@ def add_prereqs_partial_num(driver, dest_id, prereq, weight):
     if isinstance(prereq, str):
         query = """
         MERGE (p:Paper {name: $prereqName})
+        WITH p
         MATCH (n)
         WHERE elementId(n) = $id
         MERGE (p)-[:PREREQ {weight: $weight}]->(n)
@@ -64,6 +68,7 @@ def add_prereqs_partial_num(driver, dest_id, prereq, weight):
         new_weight = weight / (len(prereq) - 1) if prereq[0] == "or" else weight
         query = """
         CREATE (c:Connector)
+        WITH c
         MATCH (n)
         WHERE elementId(n) = $id
         MERGE (c)-[:PREREQ {weight: $weight}]->(n)
