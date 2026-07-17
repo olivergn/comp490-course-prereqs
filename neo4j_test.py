@@ -149,8 +149,10 @@ def test_optional_match_edges(db_driver):
 
 def test_find_mandatory_prereqs(db_driver):
     query1 = query2 = """
-    MATCH path = (p:Paper)-[:PREREQ*1..]->(:Paper {name: "COMP 325"})
-    WHERE all(c IN nodes(path)[1..-1] WHERE c:Connector AND c.name = "and")
+    MATCH path = (p:Paper)-[:PREREQ*1..]->
+        (:Paper {name: "COMP 325"})
+    WHERE all(c IN nodes(path)[1..-1]
+    WHERE c:Connector AND c.name = "and")
     RETURN DISTINCT p
     """
 
@@ -161,7 +163,8 @@ def test_find_mandatory_prereqs(db_driver):
     """
 
     query4 = """
-    MATCH path = (p:Paper)-[:PREREQ*1..]->(:Paper {name: "COMP 325"})
+    MATCH path = (p:Paper)-[:PREREQ*1..]->
+        (:Paper {name: "COMP 325"})
     WHERE all(c IN nodes(path)[1..-1] WHERE c:Connector)
     AND all(e IN relationships(path) WHERE e.weight = 1.0)
     RETURN DISTINCT p
@@ -171,14 +174,15 @@ def test_find_mandatory_prereqs(db_driver):
 
 def test_find_all_prereqs(db_driver):
     query1 = query2 = query4 = """
-    MATCH path = (p:Paper)-[:PREREQ*1..]->(:Paper {name: "COMP 325"})
+    MATCH path = (p:Paper)-[:PREREQ*1..]->
+        (:Paper {name: "COMP 325"})
     WHERE all(c IN nodes(path)[1..-1] WHERE c:Connector)
     RETURN DISTINCT p
     """
 
     query3 = """
     MATCH (p:Paper)-[:PREREQ]->
-    (:Paper {name: "COMP 325"})
+        (:Paper {name: "COMP 325"})
     RETURN DISTINCT p
     """
 
