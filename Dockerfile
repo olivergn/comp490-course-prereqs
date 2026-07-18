@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["pytest", "neo4j_test_2.py", "-s"]
+CMD ["pytest", "neo4j_test.py", "-s"]
