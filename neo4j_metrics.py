@@ -4,6 +4,10 @@ def check_course_code(course_code):
     pattern = r"^[A-Z]{4} \d{3}$"
     return re.match(pattern, course_code)
 
+##
+# Topological stratification
+##
+
 def stratify_db(driver):
     query = """
     MATCH (p:Paper) WHERE NOT ()-[]->(p)
@@ -54,16 +58,16 @@ def get_stratum_size_and_flux(driver, strat_id):
     out_paths = 0
 
     in_query = """
-    MATCH path = (start:Paper)-[:PREREQ*0..]->(end:Paper {name: $targetName})
+    MATCH path = (start:Paper)-[rels:PREREQ*0..]->(end:Paper {name: $targetName})
     WHERE start.stratum = ($stratId - 1)
     AND ALL (n IN nodes(path)[1..-1] WHERE n:Connector)
-    RETURN count(path) AS totalPaths
+    RETURN sum(REDUCE(prod = 1.0, r IN rels | prod * coalesce(r.weight, 1.0))) AS totalPaths
     """
     out_query = """
-    MATCH path = (start:Paper {name: $targetName})-[:PREREQ*0..]->(end:Paper)
+    MATCH path = (start:Paper {name: $targetName})-[rels:PREREQ*0..]->(end:Paper)
     WHERE end.stratum = ($stratId + 1)
     AND ALL (n IN nodes(path)[1..-1] WHERE n:Connector)
-    RETURN count(path) AS totalPaths
+    RETURN sum(REDUCE(prod = 1.0, r IN rels | prod * coalesce(r.weight, 1.0))) AS totalPaths
     """
 
     for name in stratum:
@@ -75,6 +79,10 @@ def get_stratum_size_and_flux(driver, strat_id):
     if strat_size > 0:
         return (out_paths - in_paths) / strat_size
     return None
+
+##
+# Curriculum-level metric functions
+##
 
 def get_curriculum_breadth(driver):
     total_breadth = 0
@@ -125,6 +133,10 @@ def get_curriculum_flux(driver):
         count += 1
         i += 1
     return total_flux / count
+
+##
+# Print functions
+##
 
 def print_stratification(driver):
     i = 1
