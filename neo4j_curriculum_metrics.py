@@ -51,7 +51,7 @@ def get_ultimate_nodes(driver):
     paper_names = [record["name"] for record in records if check_course_code(record["name"])]
     return paper_names
 
-def get_stratum_size_and_flux(driver, strat_id):
+def get_stratum_flux(driver, strat_id):
     stratum = get_nodes_in_stratum(driver, strat_id)
     strat_size = len(stratum)
     in_paths = 0
@@ -126,7 +126,7 @@ def get_curriculum_flux(driver):
     count = 0
     i = 1
     while True:
-        strat_flux = get_stratum_size_and_flux(driver, i)
+        strat_flux = get_stratum_flux(driver, i)
         if  not strat_flux:
             break
         total_flux += strat_flux
@@ -152,7 +152,7 @@ def print_stratification(driver):
 def print_stratum_fluxes(driver):
     i = 1
     while True:
-        strat_flux = get_stratum_size_and_flux(driver, i)
+        strat_flux = get_stratum_flux(driver, i)
         if  not strat_flux:
             break
         print(f"Stratum {i} flux: {strat_flux}")
