@@ -30,6 +30,15 @@ def stratify_db(driver):
         driver.execute_query(iterative_query, stratId=stratum_id)
         stratum_id += 1
 
+def get_all_papers(driver):
+    query = """
+    MATCH (p:Paper)
+    RETURN p.name AS name
+    """
+    records, _, _ = driver.execute_query(query)
+    paper_names = [record["name"] for record in records if check_course_code(record["name"])]
+    return paper_names
+
 def get_nodes_in_stratum(driver, strat_id):
     query = """
     MATCH (p:Paper)
