@@ -1,4 +1,58 @@
 ##
+# Preparation functions
+##
+def delete_projections(driver):
+    delete_query_1 = """
+    CALL gds.graph.drop('cpn', false)    
+    """
+    delete_query_2 = """
+    CALL gds.graph.drop('cpn-papers-only', false)
+    """
+
+    with driver.session() as session:
+        session.run(delete_query_1)
+        session.run(delete_query_2)
+
+def create_projections(driver):
+    exists_query = """
+    CALL gds.graph.exists($graphName)
+    YIELD exists
+    """
+    cpn_project_query = """
+    CALL gds.graph.project(
+        'cpn',
+        ['Paper', 'Connector'],
+        'PREREQ'
+    )
+    """
+    cpn_op_project_query = """
+    CALL gds.graph.project.cypher(
+        'cpn-papers-only',
+        'MATCH (p:Paper) RETURN id(p) AS id, ["Paper"] AS labels',
+        'MATCH path = (p1:Paper)-[:PREREQ*1..]->(p2:Paper)
+        WHERE p1 <> p2
+        AND ALL(c IN nodes(path)[1..-1] WHERE c:Connector)
+        RETURN id(p1) AS source, id(p2) AS target, "PREREQ_DIRECT" as type'
+    )
+    """
+
+    with driver.session() as session:
+        cpn_result = session.run(exists_query, graphName='cpn')
+        cpn_record = cpn_result.single()
+        cpn_op_result = session.run(exists_query, graphName='cpn-papers-only')
+        cpn_op_record = cpn_op_result.single()
+
+        if cpn_record and cpn_record["exists"]:
+            pass
+        else:
+            session.run(cpn_project_query)
+
+        if cpn_op_record and cpn_op_record["exists"]:
+            pass
+        else:
+            session.run(cpn_op_project_query)
+
+##
 # Non-weighted degree measures
 ##
 
@@ -105,3 +159,79 @@ def get_total_weighted_course_path_degree(driver, course_code):
     wcp_indegree = get_weighted_course_path_indegree(driver, course_code)
     wcp_outdegree = get_weighted_course_path_outdegree(driver, course_code)
     return wcp_indegree + wcp_outdegree
+
+##
+# Out-component size metrics
+##
+
+def get_outcomponent_size(driver, course_code):
+    query = """
+    MATCH (p:Paper {name: $targetName})
+    MATCH (p)-[:PREREQ*1..]->(postreq:Paper)
+    RETURN count(DISTINCT postreq) AS outCompSize
+    """
+
+    records, _, _ = driver.execute_query(query, targetName=course_code)
+    return records[0]["outCompSize"]
+
+def get_weighted_downstream_impact(driver, course_code):
+    query = """
+    MATCH (p:Paper {name: $targetName})
+    MATCH (p)-[rels:PREREQ*1..]->(postreq:Paper)
+    RETURN sum(REDUCE(prod = 1.0, r IN rels | prod * coalesce(r.weight, 1.0))) AS wdImpact
+    """
+
+    records, _, _ = driver.execute_query(query, targetName=course_code)
+    return records[0]["wdImpact"]
+
+##
+# Betweenness and PageRank centrality
+##
+
+def get_betweenness(driver, course_code):
+    query = """
+    CALL gds.betweenness.stream('cpn')
+    YIELD nodeId, score
+    WITH gds.util.asNode(nodeId) AS p, score
+    WHERE p:Paper and p.name = $targetName
+    RETURN score AS betweenness
+    """
+
+    records, _, _ = driver.execute_query(query, targetName=course_code)
+    return records[0]["betweenness"]
+
+def get_no_connectors_betweenness(driver, course_code):
+    query = """
+    CALL gds.betweenness.stream('cpn-papers-only')
+    YIELD nodeId, score
+    WITH gds.util.asNode(nodeId) AS p, score
+    WHERE p:Paper and p.name = $targetName
+    RETURN score AS ncBetweenness
+    """
+
+    records, _, _ = driver.execute_query(query, targetName=course_code)
+    return records[0]["ncBetweenness"]
+
+def get_pagerank(driver, course_code):
+    query = """
+    CALL gds.pageRank.stream('cpn')
+    YIELD nodeId, score
+    WITH gds.util.asNode(nodeId) AS p, score
+    WHERE p:Paper and p.name = $targetName
+    RETURN score AS pagerank
+    """
+
+    records, _, _ = driver.execute_query(query, targetName=course_code)
+    return records[0]["pagerank"]
+
+def get_no_connectors_pagerank(driver, course_code):
+    query = """
+    CALL gds.pageRank.stream('cpn-papers-only')
+    YIELD nodeId, score
+    WITH gds.util.asNode(nodeId) AS p, score
+    WHERE p:Paper and p.name = $targetName
+    RETURN score AS ncPagerank
+    """
+
+    records, _, _ = driver.execute_query(query, targetName=course_code)
+    return records[0]["ncPagerank"]
