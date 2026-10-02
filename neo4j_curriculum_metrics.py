@@ -104,7 +104,11 @@ def get_curriculum_breadth(driver):
         total_breadth += len(stratum)
         count += 1
         i += 1
-    return total_breadth / count
+    
+    if count > 0:
+        return total_breadth / count
+    else:
+        return None
 
 def get_curriculum_depth(driver):
     ultimate_paper_names = get_ultimate_nodes(driver)
@@ -128,7 +132,10 @@ def get_curriculum_depth(driver):
             total_depth += 1
         count += 1
 
-    return total_depth / count
+    if count > 0:
+        return total_depth / count
+    else:
+        return None
 
 def get_curriculum_flux(driver):
     total_flux = 0
@@ -136,12 +143,16 @@ def get_curriculum_flux(driver):
     i = 1
     while True:
         strat_flux = get_stratum_flux(driver, i)
-        if  not strat_flux:
+        if not strat_flux:
             break
         total_flux += strat_flux
         count += 1
         i += 1
-    return total_flux / count
+
+    if count > 0:
+        return total_flux / count
+    else:
+        return None
 
 ##
 # Print functions
