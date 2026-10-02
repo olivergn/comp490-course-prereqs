@@ -22,7 +22,13 @@ def create_projections(driver):
     CALL gds.graph.project(
         'cpn',
         ['Paper', 'Connector'],
-        'PREREQ'
+        {
+            PREREQ: {
+                type: 'PREREQ',
+                // Reverse so that centrality is conferred backwards
+                orientation: 'REVERSE'
+            }
+        }
     )
     """
     cpn_op_project_query = """
@@ -30,9 +36,10 @@ def create_projections(driver):
         'cpn-papers-only',
         'MATCH (p:Paper) RETURN id(p) AS id, ["Paper"] AS labels',
         'MATCH path = (p1:Paper)-[:PREREQ*1..]->(p2:Paper)
-        WHERE p1 <> p2
-        AND ALL(c IN nodes(path)[1..-1] WHERE c:Connector)
-        RETURN id(p1) AS source, id(p2) AS target, "PREREQ_DIRECT" as type'
+            WHERE p1 <> p2
+            AND ALL(c IN nodes(path)[1..-1] WHERE c:Connector)
+        // Invert so that centrality is conferred backwards
+        RETURN id(p2) AS source, id(p1) AS target, "PREREQ_DIRECT" as type'
     )
     """
 
@@ -123,7 +130,7 @@ def get_weighted_course_path_indegree(driver, course_code):
     query = """
     MATCH (p:Paper {name: $targetName})
     MATCH path = (prereq:Paper)-[rels:PREREQ*1..]->(p)
-    WHERE ALL(c IN nodes(path)[1..-1] WHERE c:Connector)
+        WHERE ALL(c IN nodes(path)[1..-1] WHERE c:Connector)
     RETURN sum(REDUCE(prod = 1.0, r IN rels | prod * coalesce(r.weight, 1.0))) AS wcpInDegree
     """
 
