@@ -68,7 +68,7 @@ def run_multiple_query_performance_round(db_driver, query1, query2, query3, quer
         results[i] += time
 
 def get_avg_query_performance(db_driver, query, num_rounds):
-    prereqs = pd.read_csv("prereqs_tidied.csv")
+    prereqs = pd.read_csv("comp_prereqs.csv")
     results = [0,0,0,0]
 
     for i in range(num_rounds):
@@ -82,7 +82,7 @@ def get_avg_query_performance(db_driver, query, num_rounds):
     return results
 
 def get_avg_multiple_queries_performance(db_driver, query1, query2, query3, query4, num_rounds):
-    prereqs = pd.read_csv("prereqs_tidied.csv")
+    prereqs = pd.read_csv("comp_prereqs.csv")
     results = [0,0,0,0]
 
     for i in range(num_rounds):
@@ -189,7 +189,7 @@ def test_find_all_prereqs(db_driver):
     print_avg_multiple_query_performance(db_driver, query1, query2, query3, query4, 5)
 
 def test_compare_avg_path_length(db_driver):
-    prereqs = pd.read_csv("prereqs_tidied.csv")
+    prereqs = pd.read_csv("comp_prereqs.csv")
     query = """
     MATCH (a:Paper), (b:Paper)
     WHERE a <> b
