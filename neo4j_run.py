@@ -1,7 +1,9 @@
 import pandas as pd
 from neo4j import GraphDatabase
 import neo4j_functions as nf
-import neo4j_metrics as nm
+import neo4j_curriculum_metrics as ncum
+import neo4j_course_metrics as ncom
+import report_gen as rg
 
 URI = "bolt://localhost:7687"
 AUTH = ("neo4j", "[PASSWORD]")
@@ -12,10 +14,18 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
     driver.verify_connectivity()
     nf.delete_all(driver)
     nf.populate_db_n_tree(driver, prereqs)
-    nm.stratify_db(driver)
-    depth = nm.get_curriculum_depth(driver)
-    breadth = nm.get_curriculum_breadth(driver)
-    flux = nm.get_curriculum_flux(driver)
+    ncum.stratify_db(driver)
+    ncom.delete_projections(driver)
+    ncom.create_projections(driver)
+
+    depth = ncum.get_curriculum_depth(driver)
+    breadth = ncum.get_curriculum_breadth(driver)
+    flux = ncum.get_curriculum_flux(driver)
+    print("Curriculum level metrics:\n")
     print(f"Curriculum depth: {depth}")
     print(f"Curriculum breadth: {breadth}")
     print(f"Curriculum flux: {flux}")
+
+    papers = ncum.get_all_papers(driver)
+    papers.sort()
+    rg.print_misc_report(driver, papers)
