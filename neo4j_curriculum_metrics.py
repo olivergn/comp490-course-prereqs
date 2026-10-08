@@ -27,6 +27,7 @@ def stratify_db(driver):
     stratum_id = 2
 
     for i in range(10):
+        # Hardcoded to run to 10 iterations as no more are needed here
         driver.execute_query(iterative_query, stratId=stratum_id)
         stratum_id += 1
 
@@ -173,7 +174,7 @@ def print_stratum_fluxes(driver):
     i = 1
     while True:
         strat_flux = get_stratum_flux(driver, i)
-        if  not strat_flux:
+        if strat_flux is None:
             break
         print(f"Stratum {i} flux: {strat_flux}")
         i += 1
