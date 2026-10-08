@@ -143,7 +143,7 @@ def get_curriculum_flux(driver):
     i = 1
     while True:
         strat_flux = get_stratum_flux(driver, i)
-        if not strat_flux:
+        if strat_flux is None:
             break
         total_flux += strat_flux
         count += 1
