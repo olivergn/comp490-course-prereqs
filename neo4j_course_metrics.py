@@ -2,16 +2,8 @@
 # Preparation functions
 ##
 def delete_projections(driver):
-    delete_query_1 = """
-    CALL gds.graph.drop('cpn', false)    
-    """
-    delete_query_2 = """
-    CALL gds.graph.drop('cpn-papers-only', false)
-    """
-
-    with driver.session() as session:
-        session.run(delete_query_1)
-        session.run(delete_query_2)
+    driver.execute_query("CALL gds.graph.drop('cpn', false)")
+    driver.execute_query("CALL gds.graph.drop('cpn-papers-only', false)")
 
 def create_projections(driver):
     exists_query = """
@@ -43,21 +35,13 @@ def create_projections(driver):
     )
     """
 
-    with driver.session() as session:
-        cpn_result = session.run(exists_query, graphName='cpn')
-        cpn_record = cpn_result.single()
-        cpn_op_result = session.run(exists_query, graphName='cpn-papers-only')
-        cpn_op_record = cpn_op_result.single()
+    records, _, _ = driver.execute_query(exists_query, graphName="cpn")
+    if not (records and records[0]["exists"]):
+        driver.execute_query(cpn_project_query)
 
-        if cpn_record and cpn_record["exists"]:
-            pass
-        else:
-            session.run(cpn_project_query)
-
-        if cpn_op_record and cpn_op_record["exists"]:
-            pass
-        else:
-            session.run(cpn_op_project_query)
+    records, _, _ = driver.execute_query(exists_query, graphName="cpn-papers-only")
+    if not (records and records[0]["exists"]):
+        driver.execute_query(cpn_op_project_query)
 
 ##
 # Non-weighted degree measures
