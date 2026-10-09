@@ -8,12 +8,18 @@ import report_gen as rg
 URI = "bolt://localhost:7687"
 AUTH = ("neo4j", "[PASSWORD]")
 
+# Comment according to curriculum under consideration
 prereqs = pd.read_csv("comp_prereqs.csv")
 # prereqs = pd.read_csv("math_prereqs.csv")
+
 with GraphDatabase.driver(URI, auth=AUTH) as driver:
     driver.verify_connectivity()
     nf.delete_all(driver)
-    nf.populate_db_n_tree(driver, prereqs)
+
+    # Comment according to model under consideration
+    nf.populate_db_n_tree(driver, prereqs) # M_2
+    # nf.populate_db_partial_num # M_4
+
     ncum.stratify_db(driver)
     ncom.delete_projections(driver)
     ncom.create_projections(driver)
@@ -26,6 +32,7 @@ with GraphDatabase.driver(URI, auth=AUTH) as driver:
     print(f"Curriculum breadth: {breadth}")
     print(f"Curriculum flux: {flux}")
 
+    print("\nCourse level metrics:\n")
     papers = ncum.get_all_papers(driver)
     papers.sort()
     rg.print_misc_report(driver, papers)
