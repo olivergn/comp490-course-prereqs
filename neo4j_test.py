@@ -1,5 +1,6 @@
 # python -m pytest neo4j_test_2.py -s
 
+import logging
 import time
 import pandas as pd
 import pytest
@@ -10,6 +11,8 @@ import os
 
 URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 AUTH = ("neo4j", "[PASSWORD]")
+
+logging.getLogger("neo4j").setLevel(logging.ERROR)
 
 @pytest.fixture(scope="module")
 def db_driver():
