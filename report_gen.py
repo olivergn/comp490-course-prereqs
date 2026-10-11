@@ -55,6 +55,8 @@ def print_degree_report(driver, papers):
     print(f"Max total degree: {max_td:.2f}")
     print(f"Max total course path degree: {max_cp_td:.2f}")
 
+    print()
+
 def print_weighted_report(driver, papers):
     w_ind_sum = 0
     w_cp_ind_sum = 0
@@ -110,6 +112,8 @@ def print_weighted_report(driver, papers):
     print(f"Max total weighted degree: {max_w_td:.2f}")
     print(f"Max total weighted course path degree: {max_w_cp_td:.2f}")
 
+    print()
+
 def print_misc_report(driver, papers):
     ocs_sum = 0
     wdi_sum = 0
@@ -164,3 +168,5 @@ def print_misc_report(driver, papers):
     print(f"Max no connectors betweenness: {max_nc_be:.2f}")
     print(f"Max PageRank: {max_pr:.2f}")
     print(f"Max no connectors PageRank: {max_nc_pr:.2f}")
+
+    print()
