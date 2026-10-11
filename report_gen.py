@@ -153,10 +153,10 @@ def print_misc_report(driver, papers):
 
     print(f"Mean out-component size: {(ocs_sum / len(papers)):.2f}")
     print(f"Mean weighted downstream impact: {(wdi_sum / len(papers)):.2f}")
-    print(f"Mean betweenness: {(be / len(papers)):.2f}")
-    print(f"Mean no connectors betweenness: {(nc_be / len(papers)):.2f}")
-    print(f"Mean PageRank: {(pr / len(papers)):.2f}")
-    print(f"Mean no connectors PageRank: {(nc_pr / len(papers)):.2f}")
+    print(f"Mean betweenness: {(be_sum / len(papers)):.2f}")
+    print(f"Mean no connectors betweenness: {(nc_be_sum / len(papers)):.2f}")
+    print(f"Mean PageRank: {(pr_sum / len(papers)):.2f}")
+    print(f"Mean no connectors PageRank: {(nc_pr_sum / len(papers)):.2f}")
 
     print(f"Max out-component size: {max_ocs:.2f}")
     print(f"Max weighted downstream impact: {max_wdi:.2f}")
