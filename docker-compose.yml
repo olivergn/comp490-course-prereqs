@@ -10,6 +10,7 @@ services:
         [PASSWORD]
       NEO4J_AUTH: |-
         neo4j/[PASSWORD]
+      NEO4JLABS_PLUGINS: '["graph-data-science"]'
     healthcheck:
       test: ["CMD-SHELL", "cypher-shell -u neo4j -p $$DB_PASSWORD 'RETURN 1'"]
       interval: 5s
